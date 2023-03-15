@@ -14,7 +14,7 @@
    limitations under the License.
    
    
-# IEEE-754 Floating Point Unit
+# SAP FPU
 This repo contains the files for IEEE-754 Standard Floating Point Unit 
 
 # Opcodes Information
@@ -24,9 +24,9 @@ This repo contains the files for IEEE-754 Standard Floating Point Unit
 
           Floating Point Multiplication = sfpu[2]
 
-          Floating Point Division = sfpu[3]
+          Floating Point Division = sfpu[3] // Not implemented
 
-          Floating Point Square Root = sfpu[4]
+          Floating Point Square Root = sfpu[4] // Not implemented
 
           Floating Point Minimum = sfpu[5]
 
