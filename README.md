@@ -15,7 +15,7 @@
    
    
 # SAP FPU
-This repo contains the files for IEEE-754 Standard Floating Point Unit 
+This repository contains the Simple As Possible Floating Point Unit design based on the IEEE-754 Standard.
 
 # Opcodes Information
           Floating Point Addition = sfpu[0]
