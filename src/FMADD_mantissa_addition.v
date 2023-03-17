@@ -46,7 +46,7 @@ assign Mantissa_Addition_Adder_Lane_input_A = (Mantissa_Addition_input_A_gt_B) ?
 //compliment of the Smaller operand of the two
 assign Mantissa_Addition_Compliment_Addend = (~Mantissa_Addition_input_Exp_Diff_Check) ;
 assign Mantissa_Addition_Compliment_1_Factor = (~Mantissa_Addition_Compliment_Lane_input);
-assign {Mantissa_Addition_interim_Compliment_Carry,Mantissa_Addition_Compliment_B} = ( {1'b0,Mantissa_Addition_Compliment_1_Factor} + {1'b0,Mantissa_Addition_Compliment_Addend}  );
+assign {Mantissa_Addition_interim_Compliment_Carry,Mantissa_Addition_Compliment_B} = ( {1'b0,Mantissa_Addition_Compliment_1_Factor} + {{48{1'b0}},Mantissa_Addition_Compliment_Addend}  );
 
 //Opernad two of the Adder lane
 assign Mantissa_Addition_Adder_Lane_input_B = (Mantissa_Addition_input_Eff_Sub) ? Mantissa_Addition_Compliment_B : Mantissa_Addition_Compliment_Lane_input ;
@@ -54,7 +54,7 @@ assign Mantissa_Addition_Adder_Lane_input_B = (Mantissa_Addition_input_Eff_Sub) 
 assign {Mantissa_Addition_interim_Carry,interim_mantissa_B_adder} = {1'b0, Mantissa_Addition_Adder_Lane_input_A} + {1'b0,Mantissa_Addition_Adder_Lane_input_B};
 
 //------OUTPUTS--------
-assign Mantissa_Addition_output_Mantissa = ( (~Mantissa_Addition_interim_Carry) & Mantissa_Addition_input_Eff_Sub & (~Mantissa_Addition_interim_Compliment_Carry) ) ? ( ~(interim_mantissa_B_adder) + (Mantissa_Addition_Compliment_Addend) ) : interim_mantissa_B_adder;
+assign Mantissa_Addition_output_Mantissa = ( (~Mantissa_Addition_interim_Carry) & Mantissa_Addition_input_Eff_Sub & (~Mantissa_Addition_interim_Compliment_Carry) ) ? ( ~(interim_mantissa_B_adder) + ({{47{1'b0}},Mantissa_Addition_Compliment_Addend}) ) : interim_mantissa_B_adder;
 assign Mantissa_Addition_output_Carry = Mantissa_Addition_interim_Carry;
 
 

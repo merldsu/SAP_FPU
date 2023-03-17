@@ -15,9 +15,9 @@ parameter std=31;
 parameter man= 22;
 parameter exp=7;
 parameter bias=8'b01111111;
-parameter Positive_inf = (std ==63) ? 64'h7ff0000000000000 : 32'h7f800000;
-parameter Negative_inf = (std ==63) ? 64'hfff0000000000000 : 32'hff800000;
-parameter QNAN = (std ==63) ? 64'h7ff8000000000000 : 32'h7fc00000;
+parameter Positive_inf = (std ==63) ? 64'h7ff0000000000000 : {32'h00000000,32'h7f800000};
+parameter Negative_inf = (std ==63) ? 64'hfff0000000000000 : {32'h00000000,32'hff800000};
+parameter QNAN = (std ==63) ? 64'h7ff8000000000000 : {32'h00000000,32'h7fc00000};
 parameter Positive_one = (std ==63) ? 64'h3ff0000000000000 : 64'h3f800000 ;
 parameter Negative_one = (std ==63) ? 64'hbff0000000000000 : 64'hbf800000 ;
 
@@ -325,8 +325,8 @@ assign INPUT_VALIDATION_Bit_No_Comp_B_Caught_Fadd = ( (INPUT_VALIDATION_input_op
 assign INPUT_VALIDATION_Bit_positive_infinity_Caught_Fadd =  ( (INPUT_VALIDATION_input_opcode[0]) & ( INPUT_VALIDATION_Bit_double_infinity & (~INPUT_VALIDATION_input_ieee_A[std] & ~INPUT_VALIDATION_input_ieee_B[std]) ) ) ;
 
 assign INPUT_VALIDATION_Bit_negitive_infinity_Caught_Fadd =  ( (INPUT_VALIDATION_input_opcode[0]) & ( INPUT_VALIDATION_Bit_double_infinity & (INPUT_VALIDATION_input_ieee_A[std] & INPUT_VALIDATION_input_ieee_B[std]) ) );   
-
-assign INPUT_VALIDATION_Bit_positive_zero_Caught_Fadd = ( (INPUT_VALIDATION_input_opcode[0]]) & ((INPUT_VALIDATION_Bit_double_zero & ( (~INPUT_VALIDATION_input_ieee_A[std]) & (~INPUT_VALIDATION_input_ieee_B[std]) ) ) | (INPUT_VALIDATION_Bit_Equal & INPUT_VALIDATION_Bit_xor_sign & (~(INPUT_VALIDATION_input_Frm == 3'b010)) )) )  ;   
+ 
+assign INPUT_VALIDATION_Bit_positive_zero_Caught_Fadd = ( (INPUT_VALIDATION_input_opcode[0]) & ((INPUT_VALIDATION_Bit_double_zero & ( (~INPUT_VALIDATION_input_ieee_A[std]) & (~INPUT_VALIDATION_input_ieee_B[std]) ) ) | (INPUT_VALIDATION_Bit_Equal & INPUT_VALIDATION_Bit_xor_sign & (~(INPUT_VALIDATION_input_Frm == 3'b010)) )) )  ;   
 
 assign INPUT_VALIDATION_Bit_negitive_zero_Caught_Fadd = ((INPUT_VALIDATION_input_opcode[0]) & ( (INPUT_VALIDATION_Bit_double_zero & ( INPUT_VALIDATION_input_ieee_A[std] & INPUT_VALIDATION_input_ieee_B[std] )) | (INPUT_VALIDATION_Bit_Equal & INPUT_VALIDATION_Bit_xor_sign & (INPUT_VALIDATION_input_Frm == 3'b010) ) ) ) ;
 
@@ -553,8 +553,10 @@ assign INPUT_VALIDATION_Output_invalid_flag = (rst_l) ?  ( (INPUT_VALIDATION_Bit
 
 assign INPUT_VALIDATION_Output_Flag_DZ = (rst_l & INPUT_VALIDATION_input_opcode[3]) ? (INPUT_VALIDATION_Bit_B_zero & (~(INPUT_VALIDATION_Bit_SNAN_Caught_Fdiv | INPUT_VALIDATION_Bit_QNAN_Caught_Fdiv)) & (~INPUT_VALIDATION_Bit_A_infinity) )  : 1'b0;
 
+/* verilator lint_off WIDTH */
 // Mux for sleection of coresponding exceptional output and FLags (P.S: Refer to coments against each bolen check)
 assign INPUT_VALIDATION_Output_temp_storage = (rst_l) ? ((INPUT_VALIDATION_Bit_SNAN_Caught | INPUT_VALIDATION_Bit_QNAN_Caught) ? QNAN : INPUT_VALIDATION_Bit_No_Comp_A_Caught ? INPUT_VALIDATION_input_ieee_A : INPUT_VALIDATION_Bit_Positive_No_Comp_A_Caught ? {1'b0,INPUT_VALIDATION_input_ieee_A[std-1:0]} : INPUT_VALIDATION_Bit_Negative_No_Comp_A_Caught ? {1'b1,INPUT_VALIDATION_input_ieee_A[std-1:0]} : INPUT_VALIDATION_Bit_No_Comp_B_Caught ? INPUT_VALIDATION_input_ieee_B: INPUT_VALIDATION_Bit_Positive_No_Comp_B_Caught ? {1'b0,INPUT_VALIDATION_input_ieee_B[std-1:0]} : INPUT_VALIDATION_Bit_Negative_No_Comp_B_Caught ? {1'b1,INPUT_VALIDATION_input_ieee_B[std-1:0]}: INPUT_VALIDATION_Bit_No_Comp_C_Caught ? INPUT_VALIDATION_input_ieee_C : INPUT_VALIDATION_Bit_Positive_No_Comp_C_Caught ? {1'b0,INPUT_VALIDATION_input_ieee_C[std-1:0]} : INPUT_VALIDATION_Bit_Negative_No_Comp_C_Caught ? {1'b1,INPUT_VALIDATION_input_ieee_C[std-1:0]} : INPUT_VALIDATION_Bit_negative_infinity_Caught ? Negative_inf : INPUT_VALIDATION_Bit_Positive_infinity_Caught ? Positive_inf : INPUT_VALIDATION_Bit_positive_zero_Caught ? {std+1{1'b0}} : INPUT_VALIDATION_Bit_negative_zero_Caught ? {1'b1,{std{1'b0}}} : INPUT_VALIDATION_Bit_Positive_One_Caught ? Positive_one : INPUT_VALIDATION_Bit_Negative_One_Caught ? Negative_one : ((INPUT_VALIDATION_Bit_zero_eq_neq_zero & (INPUT_VALIDATION_input_opcode[9] | INPUT_VALIDATION_input_opcode[11]) ) | INPUT_VALIDATION_Bit_Comparision_Inf_Zero_True) ? {{std{1'b0}},1'b1}  : {std+1{1'b0}}) : {std+1{1'b0}} ;
+/* verilator lint_on WIDTH */
 
 //interupt pin assignment, this will be High if at least one input is either SNAN or QNAN
 assign interupt_Pin = (rst_l) ? INPUT_VALIDATION_Bit_SNAN_Caught : 1'b0 ;

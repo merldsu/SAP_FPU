@@ -57,7 +57,7 @@ assign FMADD_ROUND_MUL_wire_condition_sticky = FMADD_ROUND_MUL_input_sticky_PN &
 
 // Add 1 in case rounding says so. Input_overflow is added so that inc becomes ineffective in case overflow is high
 assign FMADD_ROUND_MUL_wire_inc = (FMADD_ROUND_MUL_wire_condition_inf | FMADD_ROUND_MUL_wire_condition_rnte | FMADD_ROUND_MUL_wire_condition_rntmm | FMADD_ROUND_MUL_wire_condition_sticky) & (!FMADD_ROUND_MUL_output_overflow);
-assign {FMADD_ROUND_MUL_wire_carry_man, FMADD_ROUND_MUL_wire_rounded_man} = {1'b0, FMADD_ROUND_MUL_input_no[man+man+3 : man+2]} + FMADD_ROUND_MUL_wire_inc;
+assign {FMADD_ROUND_MUL_wire_carry_man, FMADD_ROUND_MUL_wire_rounded_man} = {1'b0, FMADD_ROUND_MUL_input_no[man+man+3 : man+2]} + {{24{1'b0}},FMADD_ROUND_MUL_wire_inc};
 
 //If hidden bit before rounding is zero and after rounding is one then add one in exponent other wise don't
 //this occur only for near subnormal outputs

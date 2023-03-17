@@ -325,7 +325,7 @@ begin
     S_Flags_reg <= {output_interim_Invalid_Flag_Float_To_Int,3'b000,output_interim_Inexact_Flag_Float_To_Int};
     end    
 
-  else if (sfpu_op[9] | sfpu_op[10] | sfpu_op[11]))  //output selection for comparision instructions
+  else if (sfpu_op[9] | sfpu_op[10] | sfpu_op[11])  //output selection for comparision instructions
     begin
     FPU_resultant_reg  <= {(std+1){1'b0}};
     FPU_Result_rd_reg <= output_interim_Comparison;
@@ -351,7 +351,6 @@ begin
      FPU_resultant_reg <= {(std+1){1'b0}};
      FPU_Result_rd_reg <= 32'h00000000;
      S_Flags_reg <= 5'b00000;
-     
     end  
 end
 

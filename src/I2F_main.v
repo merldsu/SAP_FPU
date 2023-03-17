@@ -70,6 +70,7 @@ defparam LZD_I2F.man = 30;
 assign INT_TO_FLOAT_wire_shifted_int = INT_TO_FLOAT_int_magnitude << INT_TO_FLOAT_wire_shifts;
 
 //man in case of double precision will be 51 and 31-man will be a negative no (2's compliment) this will be a trash value however it will not be effecting our actual result since for that std 0 will be selected for all G, R, and S
+/* verilator lint_off WIDTH */
 assign INT_TO_FLOAT_wire_guard  = (std==63) ? 1'b0 : (INT_TO_FLOAT_wire_shifted_int[5'b11111 - (man+2'b10)]);
 assign INT_TO_FLOAT_wire_round  = (std==63) ? 1'b0 : (INT_TO_FLOAT_wire_shifted_int[5'b11111 - (man+2'b11)]);
 assign INT_TO_FLOAT_wire_sticky = (std==63) ? 1'b0 : (|(INT_TO_FLOAT_wire_shifted_int[(5'b11111 - (man+3'b100)) : 0]));
@@ -79,13 +80,15 @@ assign INT_TO_FLOAT_wire_condition_inf = ((INT_TO_FLOAT_wire_round | INT_TO_FLOA
 assign INT_TO_FLOAT_wire_condition_rnte = (INT_TO_FLOAT_input_rm == 3'b000 & ((INT_TO_FLOAT_wire_guard & (INT_TO_FLOAT_wire_round | INT_TO_FLOAT_wire_sticky)) | (INT_TO_FLOAT_wire_guard & ((~INT_TO_FLOAT_wire_round) & ~(INT_TO_FLOAT_wire_sticky)) & INT_TO_FLOAT_wire_shifted_int[5'b11111 - (man+2'b01)])));
 assign INT_TO_FLOAT_wire_condition_rntmm = (INT_TO_FLOAT_input_rm == 3'b100 & ((INT_TO_FLOAT_wire_guard & (INT_TO_FLOAT_wire_round | INT_TO_FLOAT_wire_sticky)) | (INT_TO_FLOAT_wire_guard & ((~INT_TO_FLOAT_wire_round) & (~INT_TO_FLOAT_wire_sticky)))));
 
+/* verilator lint_on WIDTH */
+
 assign INT_TO_FLOAT_wire_inc_or_trunc = INT_TO_FLOAT_wire_condition_inf | INT_TO_FLOAT_wire_condition_rnte | INT_TO_FLOAT_wire_condition_rntmm;	
 
 //man in case of double precision will be 51 and 31-man will be a negative no (2's compliment) this will be a trash value however it will not be effecting our actual result since for that std 0 will be selected for carry
 assign INT_TO_FLOAT_wire_carry_prediction = (std == 64) ? (1'b0) : ((&INT_TO_FLOAT_wire_shifted_int[31 : 31-(man+1'b1)]) & (INT_TO_FLOAT_wire_inc_or_trunc));
 
 //Extra zero is added to make the size of LHS == RHS
-assign {INT_TO_FLOAT_rounded_h_man_carry, INT_TO_FLOAT_rounded_h_man} = {1'b0, INT_TO_FLOAT_wire_shifted_int[31 : 31-(man+1'b1)]} + INT_TO_FLOAT_wire_inc_or_trunc;
+assign {INT_TO_FLOAT_rounded_h_man_carry, INT_TO_FLOAT_rounded_h_man} = {1'b0, INT_TO_FLOAT_wire_shifted_int[31 : 31-(man+1'b1)]} + {{24{1'b0}},INT_TO_FLOAT_wire_inc_or_trunc};
 
 // ({(51-man)}{1'b0}) is used to add zero at the end to make the mantissa same size as mantissa of DOUBLE PRECISION
 assign INT_TO_FLOAT_wire_man_output_interim = (std == 64) ? 
@@ -96,7 +99,7 @@ assign INT_TO_FLOAT_wire_man_output_interim = (std == 64) ?
 assign INT_TO_FLOAT_wire_shifts_for_exp_cal = (&(~INT_TO_FLOAT_int_magnitude)) ? (exp_cal[lzd+1 : 0]) : {1'b0, INT_TO_FLOAT_wire_shifts};
 
 //Subtracting shifts from 31 and adding carry_prediction in it.
-assign INT_TO_FLOAT_wire_exp_interm_1 = exp_cal[lzd+1 : 0] - INT_TO_FLOAT_wire_shifts_for_exp_cal + INT_TO_FLOAT_wire_carry_prediction;
+assign INT_TO_FLOAT_wire_exp_interm_1 = exp_cal[lzd+1 : 0] - INT_TO_FLOAT_wire_shifts_for_exp_cal + {5'h00,INT_TO_FLOAT_wire_carry_prediction};
 
 //In case data is all zero than bias is not added
 assign INT_TO_FLOAT_wire_bias_toadd = (&(~INT_TO_FLOAT_int_magnitude)) ? ({(exp+1){1'b0}}) : (bias[exp : 0]);

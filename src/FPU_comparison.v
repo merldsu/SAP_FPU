@@ -54,8 +54,8 @@ module FPU_Comparison(rst_l,opcode,Comparator_Input_IEEE_A,Comparator_Input_IEEE
     assign Comparator_Sign_B = (rst_l) ? Comparator_Input_IEEE_B[Std] : 1'b0; // Sign Bit Assigning Std + 1 Because it contain IEEE754 hidden bit also
     assign Comparator_Exp_A = (rst_l) ? Comparator_Input_IEEE_A[Std - 1 : Std - Exp - 1] : {1'b0,{Exp{1'b0}}};
     assign Comparator_Exp_B = (rst_l) ? Comparator_Input_IEEE_B[Std - 1 : Std - Exp - 1] : {1'b0,{Exp{1'b0}}};
-    assign Comparator_Mantissa_A = (rst_l) ? {1'b1,Comparator_Input_IEEE_A[Man : 0]} : {1'b0,{Man{1'b0}}};
-    assign Comparator_Mantissa_B = (rst_l) ? {1'b1,Comparator_Input_IEEE_B[Man : 0]} : {1'b0,{Man{1'b0}}};
+    assign Comparator_Mantissa_A = (rst_l) ? {1'b1,Comparator_Input_IEEE_A[Man : 0]} : {1'b0,{Man+1{1'b0}}};
+    assign Comparator_Mantissa_B = (rst_l) ? {1'b1,Comparator_Input_IEEE_B[Man : 0]} : {1'b0,{Man+1{1'b0}}};
     
     assign Comparator_Output_IEEE = (rst_l==1'b0) ? 32'h00000000 : (opcode[0] == 1'b1) ? ((Comparator_Input_IEEE_A == Comparator_Input_IEEE_B) ? 32'h00000001 : 32'h00000000) : // Equal
                                                                    (opcode[1] == 1'b1) ? ((Comparator_Input_IEEE_A != Comparator_Input_IEEE_B) ? 32'h00000001 : 32'h00000000) : // Not Equal

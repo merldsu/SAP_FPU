@@ -49,7 +49,10 @@ wire FLOAT_TO_INT_wire_exception_flag;
 assign FLOAT_TO_INT_input_wire_float = (FLOAT_TO_INT_input_opcode_FI && rst_l) ? FLOAT_TO_INT_input_float : 32'b0000_0000_0000_0000_0000_0000_0000_0000;
 
 //Mapping the data to 64bit precision std
+
+/* verilator lint_off WIDTH */
 assign FLOAT_TO_INT_wire_float_mapped = {FLOAT_TO_INT_input_wire_float[std], (FLOAT_TO_INT_input_wire_float[std-1 : man+1] - bias[exp : 0] + 11'b011_1111_1111), ( {FLOAT_TO_INT_input_wire_float[man:0], {(51-man){1'b0}}} ) };
+/* verilator lint_on WIDTH */
 
 //Calculating shift amount
 assign FLOAT_TO_INT_wire_shifts_interim = (11'b10000011110 - FLOAT_TO_INT_wire_float_mapped[62:52]);
@@ -72,7 +75,7 @@ assign FLOAT_TO_INT_wire_condition_rntmm = (FLOAT_TO_INT_input_rm == 3'b100 & ((
 assign FLOAT_TO_INT_wire_rounding = FLOAT_TO_INT_wire_condition_inf | FLOAT_TO_INT_wire_condition_rnte | FLOAT_TO_INT_wire_condition_rntmm;
 
 //Roudning the Data
-assign FLOAT_TO_INT_wire_rounded_int = FLOAT_TO_INT_wire_shifted_data[83:52] + FLOAT_TO_INT_wire_rounding ;
+assign FLOAT_TO_INT_wire_rounded_int = FLOAT_TO_INT_wire_shifted_data[83:52] + {{31{1'b0}},FLOAT_TO_INT_wire_rounding} ;
 
 //Converting it to 2's compliment depending on opcode and sign of the number
 assign FLOAT_TO_INT_wire_main_output = (FLOAT_TO_INT_input_wire_float[std] & FLOAT_TO_INT_input_opcode_signed) ? ((~FLOAT_TO_INT_wire_rounded_int)+1'b1) : (FLOAT_TO_INT_wire_rounded_int) ;

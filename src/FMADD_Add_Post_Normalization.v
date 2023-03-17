@@ -69,7 +69,7 @@ defparam Lzd_PN_AD_LSB.lzd = lzd;
 assign Post_Normaliaation_Bit_Shamt_interim = Post_Normalization_input_exponent - 1'b1; 
 assign Post_Normaliaation_Bit_Shamt_1 = (Post_Normalization_input_Eff_sub) ?  Post_Normaliaation_Bit_Shamt_interim : {exp+2{1'b0}};
 assign Post_Normaliaation_Bit_input_LZD = (Post_Normalization_input_Eff_sub) ?  Post_Normalization_input_Mantissa[man+man+3:man+2] : {man+2{1'b0}};
-assign Post_Normaliaation_Bit_exp_LZD_Comp = Post_Normalization_input_exponent > Post_Normaliaation_Bit_output_LZD;
+assign Post_Normaliaation_Bit_exp_LZD_Comp = Post_Normalization_input_exponent > {4'h0,Post_Normaliaation_Bit_output_LZD};
 
 assign Post_Normaliaation_Bit_input_LZD_LSB = (Post_Normalization_input_Eff_sub) ? Post_Normalization_input_Mantissa[man+1:0] : {man+2{1'b0}};
 
@@ -78,12 +78,12 @@ assign Post_Normalization_Shifter_Output_Sub_interim  = Post_Normalization_input
 assign Post_Normaliaation_EFF_Sub_interim_Exponent_interim = Post_Normalization_input_exponent - Post_Normaliaation_Bit_Shift_Amount ; 
 
 
-assign Post_Normaliaation_Bit_Shift_Amount_LSB = (~Post_Normalization_Shifter_Output_Sub_interim[man+man+3]) ? ( ( Post_Normaliaation_EFF_Sub_interim_Exponent_interim > Post_Normaliaation_Bit_output_LZD_LSB ) ?  {{Post_Normalization_wire_Concatination_Amount_LSB{1'b0}},Post_Normaliaation_Bit_output_LZD_LSB} : (Post_Normaliaation_EFF_Sub_interim_Exponent_interim - 1'b1) ) : {exp+2{1'b0}} ;
+assign Post_Normaliaation_Bit_Shift_Amount_LSB = (~Post_Normalization_Shifter_Output_Sub_interim[man+man+3]) ? ( ( Post_Normaliaation_EFF_Sub_interim_Exponent_interim > {4'h0,Post_Normaliaation_Bit_output_LZD_LSB} ) ?  {{Post_Normalization_wire_Concatination_Amount_LSB{1'b0}},Post_Normaliaation_Bit_output_LZD_LSB} : (Post_Normaliaation_EFF_Sub_interim_Exponent_interim - 1'b1) ) : {exp+2{1'b0}} ;
 assign Post_Normalization_Shifter_Output_Sub = Post_Normalization_Shifter_Output_Sub_interim << Post_Normaliaation_Bit_Shift_Amount_LSB;
 assign Post_Normaliaation_EFF_Sub_interim_Exponent = Post_Normaliaation_EFF_Sub_interim_Exponent_interim - Post_Normaliaation_Bit_Shift_Amount_LSB;
 
 //addition lane
-assign Post_Normaliaation_EFF_add_interim_Exponent = Post_Normalization_input_exponent + Post_Normalization_input_Carry ; 
+assign Post_Normaliaation_EFF_add_interim_Exponent = Post_Normalization_input_exponent + {8'h00,Post_Normalization_input_Carry} ; 
 assign Post_Normalization_Shifter_input_add = (Post_Normalization_input_Eff_add) ? Post_Normalization_input_Mantissa : 48'h000000000000;
 assign Post_Normalization_Shifter_Output_add = (Post_Normalization_input_Carry) ? { Post_Normalization_input_Carry,Post_Normalization_Shifter_input_add[man+man+3:1] } : Post_Normalization_Shifter_input_add[man+man+3:0]  ;
 

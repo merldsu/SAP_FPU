@@ -86,7 +86,7 @@ assign FMADD_PN_MUL_wire_exp_shifts_interim = FMADD_PN_MUL_wire_op_3 ? (FMADD_PN
 //If shifts are greater than 48 then set then to 48.
 assign FMADD_PN_MUL_wire_exp_shifts = (FMADD_PN_MUL_wire_exp_shifts_interim > (man+man+4)) ? (result_size[(lzd+1) : 0]) : (FMADD_PN_MUL_wire_exp_shifts_interim[(lzd+1) : 0]) ; 
 
-assign FMADD_PN_MUL_wire_condition_2 = FMADD_PN_MUL_wire_op_3 & (!(FMADD_PN_MUL_input_lzd_shifts > FMADD_PN_MUL_wire_expDB_sub_127_extra_bit));
+assign FMADD_PN_MUL_wire_condition_2 = FMADD_PN_MUL_wire_op_3 & (!({4'b0000,FMADD_PN_MUL_input_lzd_shifts} > FMADD_PN_MUL_wire_expDB_sub_127_extra_bit));
 assign FMADD_PN_MUL_wire_shifts_lzd_msb = FMADD_PN_MUL_wire_condition_2 ? ({1'b0,FMADD_PN_MUL_input_lzd_shifts}) : { ({(lzd+1){1'b0}}) , (!FMADD_PN_MUL_input_multiplied_man[man+man+3])} ;
 
 //Condition using which value of shift will be decided
@@ -124,25 +124,27 @@ assign FMADD_PN_MUL_wire_man_final = (FMADD_PN_MUL_wire_man_interim[man+man+4]) 
 
 //Exponent Logic
 wire FMADD_PN_MUL_wire_pos_into_sub_subnormal;
-assign FMADD_PN_MUL_wire_pos_into_sub_subnormal = (FMADD_PN_MUL_wire_op_3 & (FMADD_PN_MUL_input_lzd_shifts > FMADD_PN_MUL_wire_expDB_sub_127_extra_bit)) | (FMADD_PN_MUL_input_A_sub & FMADD_PN_MUL_input_B_sub);
+assign FMADD_PN_MUL_wire_pos_into_sub_subnormal = (FMADD_PN_MUL_wire_op_3 & ({4'b0000,FMADD_PN_MUL_input_lzd_shifts} > FMADD_PN_MUL_wire_expDB_sub_127_extra_bit)) | (FMADD_PN_MUL_input_A_sub & FMADD_PN_MUL_input_B_sub);
 assign FMADD_PN_MUL_wire_condition_5 = FMADD_PN_MUL_wire_op_4 | (FMADD_PN_MUL_wire_op_5 & PM_MUL_wire_sub_or_norm_op5) | FMADD_PN_MUL_wire_pos_into_sub_subnormal ;
 
 // Zero is first stored here since exponent size of different standards is different and using one specific size for FMADD_PN_MUL_wire_exp_interim_1 will raise a mismatch error.
 assign FMADD_PN_MUL_wire_exp_interim_1 = FMADD_PN_MUL_wire_condition_5 ? ({(exp+2){1'b0}}) : (FMADD_PN_MUL_wire_expDB_sub_127_extra_bit) ;
 
 assign FMADD_PN_MUL_wire_condition_6 = FMADD_PN_MUL_wire_op_1 | FMADD_PN_MUL_wire_op_2 | (FMADD_PN_MUL_wire_op_5 & (!PM_MUL_wire_sub_or_norm_op5));
-assign FMADD_PN_MUL_wire_exp_interim_2 = FMADD_PN_MUL_wire_exp_interim_1 + FMADD_PN_MUL_input_multiplied_man[man+man+3];
+assign FMADD_PN_MUL_wire_exp_interim_2 = FMADD_PN_MUL_wire_exp_interim_1 + {8'h00,FMADD_PN_MUL_input_multiplied_man[man+man+3]};
 assign FMADD_PN_MUL_wire_exp_interim_3 = FMADD_PN_MUL_wire_condition_6 ? FMADD_PN_MUL_wire_exp_interim_2 : FMADD_PN_MUL_wire_exp_interim_1 ;
 
 assign FMADD_PN_MUL_wire_condition_7 = FMADD_PN_MUL_wire_condition_2;
 assign FMADD_PN_MUL_wire_lzd_true = FMADD_PN_MUL_input_lzd_shifts - 5'b0_0001;
+/* verilator lint_off WIDTH */
 assign FMADD_PN_MUL_wire_lzd_true_sub_49 = (FMADD_PN_MUL_wire_lzd_true - FMADD_PN_MUL_wire_man_interim[man+man+4]);
 assign FMADD_PN_MUL_wire_exp_interim_4 = FMADD_PN_MUL_wire_exp_interim_3 - FMADD_PN_MUL_wire_lzd_true_sub_49;
+/* verilator lint_on WIDTH */
 
 assign FMADD_PN_MUL_wire_exp_interim_5 = FMADD_PN_MUL_wire_condition_7 ? FMADD_PN_MUL_wire_exp_interim_4 : FMADD_PN_MUL_wire_exp_interim_3 ;
 
 // In case hidden bit of the mantissa is 1 and exponent is all 0 then add 1 in the exponent
-assign FMADD_PN_MUL_wire_condition_8 = ((FMADD_PN_MUL_wire_man_final[man+man+3]) & FMADD_PN_MUL_wire_pos_into_sub_subnormal & (&(!FMADD_PN_MUL_wire_exp_interim_5)));
+assign FMADD_PN_MUL_wire_condition_8 = ((FMADD_PN_MUL_wire_man_final[man+man+3]) & FMADD_PN_MUL_wire_pos_into_sub_subnormal & (&(~FMADD_PN_MUL_wire_exp_interim_5)));
 assign FMADD_PN_MUL_wire_exp_interim_6 = (FMADD_PN_MUL_wire_condition_8) ? (FMADD_PN_MUL_wire_exp_interim_5 + 1'b1) : (FMADD_PN_MUL_wire_exp_interim_5) ;
 
 //Output number
